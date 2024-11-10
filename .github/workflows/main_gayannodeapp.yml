@@ -35,9 +35,13 @@ jobs:
         run: |
           echo "---->building client"
           cd ./client
+          echo "---->49"
           npm install
+          echo "---->50"
           npm run build --if-present
-          ls .
+          echo "---->51"
+          ls -la
+          echo "---->52"
           npm run test --if-present
           
       - name: Zip artifact for deployment
