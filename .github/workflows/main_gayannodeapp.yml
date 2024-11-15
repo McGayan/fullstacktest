@@ -21,6 +21,11 @@ jobs:
         with:
           node-version: '18.x'
 
+      - name: Remove unwanted files
+        run: |
+          rm -rf ./google-script
+          ls ./ -la
+
       - name: npm install, build, and test server
         run: |
           echo "---->building server"
