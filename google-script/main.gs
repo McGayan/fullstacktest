@@ -76,7 +76,7 @@ function parseIfDescriptionTable(table)
       var dataEntryPattern = /<td[\s\S]*?>[\s\S]*?<\/td>/gi;
       var dataEntryMatches = matches[i].match(dataEntryPattern);
       if(dataEntryMatches == null) continue;
-      var rowEntry = {};
+      var rowEntry = [];
       let descriptionIndex = 0;
       for (var j = 0; j < dataEntryMatches.length; j++)
       {
@@ -85,12 +85,14 @@ function parseIfDescriptionTable(table)
         if (dataMatches.length > 0)
         {
           let strData = removeTagsFromValueString(dataMatches[0]);
-          rowEntry[descriptions[descriptionIndex++]] = strData
+          rowEntry.push(strData);
         }
       }
       rows.push(rowEntry);
     }
     billData["rows"] = rows;
+    if(billData.metadata == null) billData.metadata = {};
+    billData['metadata'].desc = descriptions;
   }
   else
   {
@@ -139,8 +141,8 @@ function parseIfDescriptionTable(table)
           }
         }*/
       }
-      const newMeta = {epoch:convertToEpoch(metadata.date, metadata.time)}
-      billData["metadata"] = newMeta;
+      if(billData.metadata == null) billData.metadata = {};
+      billData["metadata"].epoch = convertToEpoch(metadata.date, metadata.time);
     }
   }
   return true;
@@ -183,7 +185,7 @@ function getKeelsMails() {
         {
           Logger.log("No tables found.");
         }
-        message.markRead();
+        //message.markRead();
       }
      }
     )

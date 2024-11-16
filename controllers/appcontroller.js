@@ -36,8 +36,8 @@ class ServiceController
 		//const body = request.body;
 		console.log('Received Body ${JSON.stringify(body)}');
 		const product = {
-			date:body.metadata.date,
-			time:body.metadata.time,
+			epoch:body.metadata.epoch,
+			desc:body.metadata.desc,
 			expenses:body.rows
 		};
 		console.log('Product ${JSON.stringify(product)}');
