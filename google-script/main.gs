@@ -180,85 +180,37 @@ function getKeelsMails() {
             parseIfDescriptionTable(matches[i])
           }
           Logger.log(JSON.stringify(billData))
+          postBillDataToAzure();
         }
         else
         {
           Logger.log("No tables found.");
         }
-        //message.markRead();
+        message.markRead();
       }
      }
     )
   })
 }
 
-function testFunction() {
-  let table = [];
-  table["hello"] = "world";
-  table[1] = 10;
-
-  Logger.log(table["hello"]);
-  Logger.log(table[1]);
-}
-
-function testPost() {
-  var url = "http://mcgayan.kesug.com/testpost.php";
-  var options = {
-    "method": "post",
-    "headers": {
-     "Authorization": "Basic " + Utilities.base64Encode(" ...account.SID... : ...auth.token... ")
-    },
-    "payload": {
-      "From": "+12025551212",
-      "To": "+14155551212",
-      "Body": "Test from Google Apps Script"
-    }
+function postBillDataToAzure()
+{
+  const apiUrl = "https://mcx.azurewebsites.net/exprec";
+  const options = {
+    method: "POST",
+    contentType: "application/json",
+    payload: JSON.stringify(billData)
   };
-  var response = UrlFetchApp.fetch(url, options);
-  var code = response.getResponseCode();
-  var content = response.getContent();
-  var headers = response.getHeaders();
-  var contentText = response.getContentText();
-  var str = response.toString();
-  Logger.log(contentText);
-}
+  try
+  {
+    const response = UrlFetchApp.fetch(apiUrl, options);
 
-function sendData() {
-  var url = "mcgayan.kesug.com/hello.html"; // Replace with your PHP script URL
-  var payload = {
-    name: "John Doe",
-    age: 30,
-    city: "New York"
-  };
-  
-  var options = {
-    "method" : "get",
-    "contentType" : "application/json",
-    "payload" : JSON.stringify(payload)
-  };
-  
-  var response = UrlFetchApp.fetch(url);
-  Logger.log(response.getContentText());
-}
-
-function sendToThingSpeak() {
-  var url = 'https://api.thingspeak.com/update';
-  var apiKey = '6O0OEFM8LZ2RYXE5'; // Replace with your ThingSpeak Write API Key
-  
-  // Example string values to send
-  var field1Value = 'Hello';
-  var field2Value = 'World';
-  
-  var payload = {
-    'api_key': apiKey,
-    'field3': field1Value,
-    'field4': field2Value
-  };
-  
-  var queryString = Object.keys(payload).map(function(key) {
-    return encodeURIComponent(key) + '=' + encodeURIComponent(payload[key]);
-  }).join('&');
-  
-  var response = UrlFetchApp.fetch(url + '?' + queryString);
-  Logger.log(response.getContentText());
+    Logger.log("Response Code: " + response.getResponseCode());
+    Logger.log("Response Body: " + response.getContentText());
+  }
+  catch (error)
+  {
+    // Handle any errors
+    Logger.log("Error: " + error.message);
+  }
 }
