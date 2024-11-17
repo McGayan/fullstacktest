@@ -33,7 +33,11 @@ app.post("/exprec", async(req, res) => {
 	const data = req.body;
 	console.log('Received POST request:', data);
 	let addResponce = await appController.addProduct(data);
-	res.json({ message: 'Data received successfully', receivedData: addResponce });
+	//res.json({ message: 'Data received successfully', receivedData: addResponce });
+	if(addResponce == null)
+		res.status(500).json({success: false, message: "Failed to insert data"  });
+	else
+		res.status(201).json({ success: true, message: "Data inserted successfully" });
 });
 
 const port = process.env.PORT || 5000;

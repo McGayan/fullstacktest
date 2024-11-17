@@ -33,10 +33,12 @@ class ServiceController
 	
 	async addProduct(body)
 	{
-		//const body = request.body;
-		console.log('Received Body ${JSON.stringify(body)}');
+		const epoch = body.metadata.epoch;
+		const dateKey = this.#getYearAndMonthFromEpoch(epoch);
 		const product = {
 			epoch:body.metadata.epoch,
+			year:dateKey.year,
+			month:dateKey.month,
 			desc:body.metadata.desc,
 			expenses:body.rows
 		};
@@ -63,6 +65,22 @@ class ServiceController
 		let data = await this.dao.updateProduct(id,product);
 		response.send({ data: data });
 	}
+
+	#getYearAndMonthFromEpoch(epoch) {
+		// Convert to milliseconds if the epoch is in seconds
+		if (epoch.toString().length === 10) {
+		  epoch *= 1000;
+		}
+	  
+		// Create a Date object from the epoch
+		const date = new Date(epoch);
+	  
+		// Extract the year and month
+		const year = date.getFullYear(); // Get the year
+		const month = date.getMonth() + 1; // Get the month (0-based, so add 1)
+	  
+		return { 'year':year, 'month':month };
+	  }
 }
 
 module.exports = ServiceController;

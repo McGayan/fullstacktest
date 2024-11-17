@@ -39,7 +39,16 @@ class DataAcecss
 		const responseDb = await this.client.databases.createIfNotExists( {id:this.databaseId});
 		this.database = responseDb.database;
 		console.log('Database Created ${this.database}');
-		const responseContainer = await this.database.containers.createIfNotExists({id:this.collectionId});
+		
+		const containerDefinition = {
+			id: this.collectionId,
+			partitionKey: {
+				paths: ["/year", "/month"],
+				version: 2, /*PartitionKeyDefinitionVersion.V2*/
+				kind: "MultiHash",/*PartitionKeyKind.MultiHash*/
+			},
+		}
+		const responseContainer = await this.database.containers.createIfNotExists(containerDefinition);
 		this.container =  responseContainer.container;
 		console.log('Container Created ${this.container}');
 		
@@ -59,6 +68,7 @@ class DataAcecss
 			{
 				Message: 'The item creation failed ${ex.message}'
 			}
+			return null;
 		}
 	}
 	
