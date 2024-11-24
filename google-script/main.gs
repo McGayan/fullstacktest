@@ -50,6 +50,36 @@ function convertToEpoch(dateString, timeString)
   return unixEpoch;
 }
 
+function Trim(str, regExPattern)
+{
+  var result;
+  if (typeof str === 'string') 
+  {
+    result = str.replace(regExPattern, '');
+    return result;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+function extractTableRowCellValues(strRow)
+{
+	strRow = Trim(strRow, /\s*<tr>\s*/g);
+	strRow = Trim(strRow, /\s*<\/tr>\s*/g)
+	const cellArr = strRow.split("</td>");
+	const retArr = [];
+	for(i=0; i<cellArr.length; i++)
+	{
+		let cellData = Trim(cellArr[i], /\s*<td>/g);
+		cellData = removeTagsFromValueString(cellData);
+    if(cellData.length > 0)
+		  retArr.push(cellData);
+	}
+	return retArr;
+}
+
 function parseIfDescriptionTable(table)
 {
   //check if the header contains <th> row. If not this is now the correct table
@@ -122,27 +152,26 @@ function parseIfDescriptionTable(table)
             metadata["time"] = dateMatches[0];
           }
         }
-        /*else if(tmpStr.includes("Billed Store"))
+        else if(tmpStr.includes("Billed Store"))
         {
-          var dataPattern = /\d{2}:\d{2}:\d{2}/gi;
-          var dateMatches = tmpStr.match(dataPattern);
-          if(dateMatches.length > 0)
+          let cellDataArr = extractTableRowCellValues(tmpStr);
+          if(cellDataArr.length > 0)
           {
-            metadata["store"] = dateMatches[0];
+            metadata["store"] = cellDataArr[cellDataArr.length - 1];
           }
         }
-        else if(tmpStr.includes("Billed Address"))
+        else if(tmpStr.includes("Store Address"))
         {
-          var dataPattern = /\d{2}:\d{2}:\d{2}/gi;
-          var dateMatches = tmpStr.match(dataPattern);
-          if(dateMatches.length > 0)
+          let cellDataArr = extractTableRowCellValues(tmpStr);
+          if(cellDataArr.length > 0)
           {
-            metadata["address"] = dateMatches[0];
+            metadata["address"] = cellDataArr[cellDataArr.length - 1];
           }
-        }*/
-      }
+        }}
       if(billData.metadata == null) billData.metadata = {};
       billData["metadata"].epoch = convertToEpoch(metadata.date, metadata.time);
+      billData["metadata"].store = metadata.store;
+      billData["metadata"].address = metadata.address;
     }
   }
   return true;
@@ -179,14 +208,15 @@ function getKeelsMails() {
           {
             parseIfDescriptionTable(matches[i])
           }
+          billData.metadata.super = "k"
           Logger.log(JSON.stringify(billData))
-          postBillDataToAzure();
+          //postBillDataToAzure();
         }
         else
         {
           Logger.log("No tables found.");
         }
-        message.markRead();
+        //message.markRead();
       }
      }
     )
