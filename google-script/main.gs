@@ -90,13 +90,11 @@ function parseIfDescriptionTable(table)
   var metadata = {};
   if(matches && matches.length > 0)
   {
-    Logger.log("correct one found. header length: " + matches.length);
     var valuePattern = />[\s\S]+?</gi;
     for (var i = 0; i < matches.length; i++)
     {
       var strValue= matches[i].match(valuePattern);
       var strColTitle = removeTagsFromValueString(strValue[0]);
-      Logger.log(strColTitle);
       descriptions.push(strColTitle);
     }
     var tableRowPattern = /<tr[\s\S]*?>[\s\S]+?<\/tr>/gi;
@@ -192,8 +190,9 @@ function getKeelsMails() {
   const threads = keellsLable.getThreads()
   threads.forEach((thread) => {
     const messages = thread.getMessages()
-    //Logger.log(firstMsg.)
-    messages.forEach((message) => {
+    for(msgIndex=0; msgIndex<messages.length; msgIndex++)
+    {
+      let message = messages[msgIndex];
       if(message.isUnread())
       {
         let msgBody = message.getBody()
@@ -210,16 +209,16 @@ function getKeelsMails() {
           }
           billData.metadata.super = "k"
           Logger.log(JSON.stringify(billData))
-          //postBillDataToAzure();
+          postBillDataToAzure();
+          message.markRead();
+          break;  //skip the rest of the messages in this thread
         }
         else
         {
           Logger.log("No tables found.");
         }
-        //message.markRead();
       }
      }
-    )
   })
 }
 

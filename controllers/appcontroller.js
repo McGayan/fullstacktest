@@ -39,8 +39,11 @@ class ServiceController
 			epoch:body.metadata.epoch,
 			year:dateKey.year,
 			month:dateKey.month,
+			store:body.metadata.store,
+			address:body.metadata.address,
+			super:body.metadata.super,
 			desc:body.metadata.desc,
-			expenses:body.rows
+			expenses:body.rows,
 		};
 		console.log('Product ${JSON.stringify(product)}');
 		let data = await this.dao.addProduct(product);
