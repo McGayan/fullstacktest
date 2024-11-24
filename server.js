@@ -24,6 +24,11 @@ app.get('/api', (req, res) => {
   res.json({ users: ['user1', 'user2', 'user3', 'user5'] });
 });
 
+app.get('/getrecs', async (req, res) => {
+	const respomse = await appController.getRecordsByMonthAndYear(2024, 11);
+	res.status(201).json({ success: true, message: "Data queried successfully", records: respomse });
+});
+
 // The "catchall" handler: For any request that doesn't match "/api", send back React's index.html
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname, '../client/build', 'index.html'));

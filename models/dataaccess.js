@@ -163,6 +163,35 @@ class DataAcecss
 			});
 		}
 	}
+
+	async getRecordsForMonth(year, month)
+	{
+		try
+		{
+			// SQL query to fetch records
+			const querySpec = {
+				query: "SELECT * FROM c WHERE c.year = @year AND c.month = @month",
+				parameters: [
+					{ name: "@year", value: year },
+					{ name: "@month", value: month },
+				],
+			};
+
+			const { resources: records } = await this.container.items
+											.query(querySpec, {
+											partitionKey: [year, month], // Hierarchical partition key
+											})
+											.fetchAll();
+
+			console.log(`Retrieved ${records.length} records for ${year}-${month}`);
+			return records;
+		}
+		catch (error)
+		{
+			console.error("Error retrieving records:", error.message);
+			throw new Error("Failed to retrieve records");
+		}
+	}
 }
 
 module.exports = DataAcecss;

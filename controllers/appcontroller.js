@@ -66,6 +66,12 @@ class ServiceController
 		response.send({ data: data });
 	}
 
+	async getRecordsByMonthAndYear(year, month)
+	{
+		let qResult = await this.dao.getRecordsForMonth(year, month);
+		return qResult;
+	}
+
 	#getYearAndMonthFromEpoch(epoch) {
 		// Convert to milliseconds if the epoch is in seconds
 		if (epoch.toString().length === 10) {
