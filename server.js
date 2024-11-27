@@ -25,7 +25,18 @@ app.get('/api', (req, res) => {
 });
 
 app.get('/getrecs', async (req, res) => {
-	const respomse = await appController.getRecordsByMonthAndYear(2024, 11);
+	let respomse = null;
+	if(req.query.epoch == null)
+	{
+		const year = Number(req.query.year);
+		const month = Number(req.query.month);
+		respomse = await appController.getRecordsByMonthAndYear(year, month);
+	}
+	else
+	{
+		const epoch = Number(req.query.epoch);
+		respomse = await appController.getRecordByEpoch(epoch);
+	}
 	res.status(201).json({ success: true, message: "Data queried successfully", records: respomse });
 });
 

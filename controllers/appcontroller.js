@@ -75,6 +75,12 @@ class ServiceController
 		return qResult;
 	}
 
+	async getRecordByEpoch(epoch)
+	{
+		let qResult = await this.dao.getRecordForEpoch(epoch);
+		return qResult;
+	}
+
 	#getYearAndMonthFromEpoch(epoch) {
 		// Convert to milliseconds if the epoch is in seconds
 		if (epoch.toString().length === 10) {

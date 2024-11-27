@@ -192,6 +192,34 @@ class DataAcecss
 			throw new Error("Failed to retrieve records");
 		}
 	}
+
+	async getRecordForEpoch(epoch)
+	{
+		try
+		{
+			// SQL query to fetch records
+			const querySpec = {
+				query: "SELECT * FROM c WHERE c.epoch = @epoch",
+				parameters: [
+					{ name: "@epoch", value: epoch },
+				],
+			};
+
+			const { resources: records } = await this.container.items
+											.query(querySpec)
+											.fetchAll();
+
+			console.log(`Retrieved ${records.length} records for ${epoch}`);
+			return records;
+		}
+		catch (error)
+		{
+			console.error("Error retrieving records:", error.message);
+			throw new Error("Failed to retrieve records");
+		}
+	}
+
 }
+
 
 module.exports = DataAcecss;
