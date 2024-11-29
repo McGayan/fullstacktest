@@ -1,31 +1,14 @@
 import React, {useEffect, useState} from 'react'
+import utils from "./utils.js";
 const clientConfig = require('./clientConfig.js');
 
-function getIndexMap(records)
-{
-	let indexMap = {}
-	if(records.length > 0)
-	{
-		const firstRecord = records[0];
-		const descriptionRow = firstRecord.desc
-		for (let i = 0; i < descriptionRow.length; i++)
-			indexMap[descriptionRow[i].toLowerCase()] = i;
-	}
-	return indexMap;
-}
-
-function calculateTotal(record, amountIndex) {
-	let total = 0;
-;
-	const expenses = record.expenses;
-	expenses.forEach(expenseRow => {
-		total += parseFloat(expenseRow[amountIndex]);
-	});
-	//console.log(total);
-	return total;
-}
-
-function MainExplorer() {
+function MainExplorer(props) {
+	const callbackSwitchFunc = props.callbackSwitch;
+	const handleClick = (text) => {
+		console.log(`You clicked on: ${text}`);
+		callbackSwitchFunc({ epoch: text, flag: "entry" });
+	};
+  
 	const [backendData, setBackendData] = useState([]);
 	const [tableHeaders, setTableHeaders] = useState([]);
 	useEffect(() => {
@@ -34,13 +17,13 @@ function MainExplorer() {
 			response => response.json()
 		).then(
 			data => {
-				const indexMap = getIndexMap(data.records);
+				const indexMap = utils.getIndexMap(data.records);
 				let displayRows = [];
 				data.records.forEach(record => {
 					let displayRec = {}
 					let date = new Date(record.epoch * 1000);
 					displayRec.Date = date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate()
-					displayRec.Amount = calculateTotal(record, indexMap.amount).toFixed(2);
+					displayRec.Amount = indexMap.amount != null ? utils.calculateTotal(record, indexMap.amount).toFixed(2) : 0;
 					displayRec.super = record.super;
 					displayRec.epoch = record.epoch;
 					displayRows.push(displayRec);
@@ -72,6 +55,9 @@ function MainExplorer() {
 										{row[field]}
 									</td>
 								)})}
+								<td style={{color:clientConfig[row.super].linkTextForeColor, backgroundColor:clientConfig[row.super].linkTextBackColor}}>
+									<span onClick={() => handleClick(row.epoch)}>edit</span>
+								</td>
 							</tr>
 						)) : <></>}
 				</tbody>
