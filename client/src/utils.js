@@ -1,5 +1,5 @@
 
-const getIndexMapFunc = (records) => {
+const getIndexMap = (records) => {
 	let indexMap = {}
 	if(records.length > 0)
 	{
@@ -11,7 +11,7 @@ const getIndexMapFunc = (records) => {
 	return indexMap;
 }
 
-const calculateTotalFunc = (record, amountIndex) => {
+const calculateTotal = (record, amountIndex) => {
 	let total = 0;
 	const expenses = record.expenses;
 	expenses.forEach(expenseRow => {
@@ -21,6 +21,33 @@ const calculateTotalFunc = (record, amountIndex) => {
 	return total;
 }
 
-const utils = {getIndexMap: getIndexMapFunc, calculateTotal: calculateTotalFunc}
+const getYearAndMonthFromEpoch = (epoch) => {
+	// Convert to milliseconds if the epoch is in seconds
+	if (epoch.toString().length === 10) {
+	  epoch *= 1000;
+	}
+  
+	// Create a Date object from the epoch
+	const date = new Date(epoch);
+  
+	// Extract the year and month
+	const year = date.getFullYear(); // Get the year
+	const month = date.getMonth() + 1; // Get the month (0-based, so add 1)
+	const day = date.getDay();
+	const hour = date.getHours();
+	const minutes = date.getMinutes();
+  
+	return { year, month, day, hour, minutes };
+}
+
+const getFormatedDateAndTimeFromEposh = (epoch) => {
+	const { year, month, day, hour, minutes } = getYearAndMonthFromEpoch(epoch);
+	const dateStr = "" + year + "-" + month + "-" + day;
+	const timeSTr = "" + hour + ":" + minutes;
+	return {dateStr, timeSTr};
+
+}
+
+const utils = {getIndexMap, calculateTotal, getYearAndMonthFromEpoch, getFormatedDateAndTimeFromEposh}
 
 module.exports = utils;

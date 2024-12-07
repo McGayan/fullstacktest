@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import utils from './utils';
+import clientConfig from './clientConfig';
 
 let totalExpended = 0;
 function EntryExplorer(props) {
@@ -30,6 +31,14 @@ function EntryExplorer(props) {
 
 	return (
 		<div>
+			{expenseRecord.epoch != null ? 
+			<table style={{padding: "20px", textAlign: "left" }}>
+				<tr><th>Date: </th><td>{utils.getFormatedDateAndTimeFromEposh(expenseRecord.epoch).dateStr}</td></tr>
+				<tr><th>Time: </th><td>{utils.getFormatedDateAndTimeFromEposh(expenseRecord.epoch).timeSTr}</td></tr>
+				<tr><th>Super: </th><td>{clientConfig[expenseRecord.super].type}</td></tr>
+				<tr><th>Store: </th><td>{expenseRecord.store}</td></tr>
+				<tr><th>Address: </th><td>{expenseRecord.address}</td></tr>
+			</table>  : <></>}
 		  <table
 			style={{
 			  borderCollapse: "collapse",

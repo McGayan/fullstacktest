@@ -1,4 +1,5 @@
 const express = require('express');
+const arpicoParser = require('./arpicoParser.js')
 const path = require('path');
 const cors = require('cors');
 const app = express();
@@ -47,8 +48,17 @@ app.get('*', (req, res) => {
 
 app.post("/exprec", async(req, res) => {
 	const data = req.body;
-	console.log('Received POST request:', data);
-	let addResponce = await appController.addProduct(data);
+	//console.log('Received POST request:', data);
+	let addResponce = null;
+	if(data && data.metadata) {
+		if(data.metadata.super == "k") {
+			addResponce = await appController.addProduct(data);
+		}
+		else if(data.metadata.super == "a"){
+			const arpicoBill = await arpicoParser.parseArpicoFromUrl(data);
+			addResponce = await appController.addProduct(arpicoBill);
+		}
+	}
 	//res.json({ message: 'Data received successfully', receivedData: addResponce });
 	if(addResponce == null)
 		res.status(500).json({success: false, message: "Failed to insert data"  });

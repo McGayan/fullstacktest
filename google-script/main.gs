@@ -1,19 +1,29 @@
 var billData = {}
 
-function addKeellsLable() {
-  const threads = GmailApp.getInboxThreads();
-  const keellsLableName = "Keells"
+function addLable() {
+   const keellsLableName = "Keells"
   let keellsLable = GmailApp.getUserLabelByName(keellsLableName)
   if(keellsLable == null)
   {
     keellsLable = GmailApp.createLabel(keellsLableName)
   }
-
+  const arpicoLableName = "Arpico"
+  let arpicoLable = GmailApp.getUserLabelByName(arpicoLableName)
+  if(arpicoLable == null)
+  {
+    arpicoLable = GmailApp.createLabel(arpicoLableName)
+  }
+  const threads = GmailApp.getInboxThreads();
   threads.forEach((thread) => {
     let name = thread.getFirstMessageSubject()
     if(name.toLowerCase().includes("keells"))
     {
       thread.addLabel(keellsLable)
+      thread.moveToArchive()
+    }
+    else if(name.toLowerCase().includes("arpico"))
+    {
+      thread.addLabel(arpicoLable)
       thread.moveToArchive()
     }
   })
@@ -184,7 +194,7 @@ function logInDrive(msgBody, fileName)
 }
 
 function getKeelsMails() {
-  addKeellsLable();
+  addLable();
   const keellsLableName = "Keells"
   let keellsLable = GmailApp.getUserLabelByName(keellsLableName)
   const threads = keellsLable.getThreads()
@@ -242,4 +252,50 @@ function postBillDataToAzure()
     // Handle any errors
     Logger.log("Error: " + error.message);
   }
+}
+
+function parseArpicoMails()
+{
+  const lableName = "arpico"
+  let lable = GmailApp.getUserLabelByName(lableName)
+  const threads = lable.getThreads()
+  threads.forEach((thread) => {
+    const messages = thread.getMessages()
+    for(msgIndex=0; msgIndex<messages.length; msgIndex++)
+    {
+      let message = messages[msgIndex];
+      if(message.isUnread())
+      {
+        let msgBody = message.getBody()
+        //Log message body in Drive
+        //logInDrive(msgBody, "keells.txt");
+        var hrefPattern = /<a\s+href([^>]*)>/gi;
+        // Find all matches
+        var matches = msgBody.match(hrefPattern);
+        if (matches)
+        {
+          for (var i = 0; i < matches.length; i++)
+          {
+            Logger.log(matches[i]);
+            if(matches[i].includes("ebill"))
+            {
+              billData = {};
+              var urlPattern = /"([^"]*)"/gi;
+              var urlMatches = matches[i].match(urlPattern);
+              if (urlMatches.length > 0)
+              {
+                  billData.metadata = {};
+                  billData.metadata.super = "a";
+                  billData.billUrl = urlMatches[0].replace(/^\s*\"|\"\s*$/g, ''); //replace leading and trailing spaces and the double quots
+                  //postBillDataToAzure();
+
+                  Logger.log(JSON.stringify(billData));
+                  break;
+              }
+            }
+          }
+        }
+      }
+    }
+  })
 }
