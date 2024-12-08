@@ -27,7 +27,7 @@ function EntryExplorer(props) {
 			}
 		)
 	
-	}, [])
+	}, [props.epoch])
 
 	return (
 		<div>
@@ -72,7 +72,7 @@ function EntryExplorer(props) {
 						  style={{
 							paddingRight: "1%",
 							paddingLeft: "1%",
-							textAlign: itemIndex == 2 ? "left" : "right",
+							textAlign: itemIndex === 2 ? "left" : "right",
 						  }}
 						>
 						  {item}
