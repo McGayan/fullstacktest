@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import EntryExplorer from "./EntryExplorer";
 import MainExplorer from "./MainExplorer";
-const clientConfig = require('./clientConfig.js');
-
 
 function App() {
 
@@ -18,7 +16,7 @@ function App() {
 
 	return(
 		<div>
-			{displayContent.flag == "main" ? (
+			{displayContent.flag === "main" ? (
 				<MainExplorer callbackSwitch={switchFunction} />
 			) : (
 				<EntryExplorer	callbackSwitch={switchFunction}	epoch={displayContent.epoch}/>
