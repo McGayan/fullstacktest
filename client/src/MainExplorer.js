@@ -4,7 +4,7 @@ const clientConfig = require('./clientConfig.js');
 
 function MainExplorer(props) {
 	const callbackSwitchFunc = props.callbackSwitch;
-	const handleClick = (text) => {
+	const handleClick_explore = (text) => {
 		console.log(`You clicked on: ${text}`);
 		callbackSwitchFunc({ epoch: text, flag: "entry" });
 	};
@@ -56,7 +56,7 @@ function MainExplorer(props) {
 									</td>
 								)})}
 								<td style={{color:clientConfig[row.super].linkTextForeColor, backgroundColor:clientConfig[row.super].linkTextBackColor}}>
-									<span onClick={() => handleClick(row.epoch)}>edit</span>
+									<span onClick={() => handleClick_explore(row.epoch)}>edit</span>
 								</td>
 							</tr>
 						)) : <></>}

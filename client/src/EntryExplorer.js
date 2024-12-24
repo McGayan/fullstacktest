@@ -82,10 +82,11 @@ function EntryExplorer(props) {
 				  </tr>
 				);
 			  }) : <></>}
-			  <tr>
-			  	<th colSpan="5">Total</th>
-				<th>{totalExpended}</th>
-			  </tr>
+			  {(expenseRecord != null && expenseRecord.desc != null) ? <tr>
+					<th colSpan={expenseRecord.desc.length - 1}>Total</th>
+					<th>{totalExpended}</th>
+				</tr> : <></>
+			}
 			</tbody>
 		  </table>
 		  <button onClick={onClickHome}>home{props.epoch}</button>

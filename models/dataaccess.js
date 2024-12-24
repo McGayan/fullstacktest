@@ -24,6 +24,16 @@ class DataAcecss
 		return databaseExists;
 	}
 	
+	// Function to count items in the container
+	async getContainerItemCount() 
+	{
+		const querySpec = {
+			query: "SELECT VALUE COUNT(1) FROM c"
+		};
+
+		const { resources: results } = await this.container.items.query(querySpec).fetchAll();
+		return results[0] || 0; // The count will be in the first (and only) item in results
+	}
 
 	async initDbAndContainer()
 	{
@@ -51,7 +61,8 @@ class DataAcecss
 		const responseContainer = await this.database.containers.createIfNotExists(containerDefinition);
 		this.container =  responseContainer.container;
 		console.log('Container Created ${this.container}');
-		
+		const itemCount = await this.getContainerItemCount();
+		console.log(`Number of items in container "${this.collectionId}": ${itemCount}`);
 	}
 	
 	async addProduct(product)
