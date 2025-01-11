@@ -1,16 +1,26 @@
-import React, {useEffect, useState} from 'react'
+import "./styles.css";
+import React, {useEffect, useState, useRef} from 'react'
 import utils from "./utils.js";
+import { SlOptionsVertical } from "react-icons/sl";
 const clientConfig = require('./clientConfig.js');
 
 function MainExplorer(props) {
+	const [openMenuId, setOpenMenuId] = useState(null);
+	const menuRef = useRef(null);
 	const callbackSwitchFunc = props.callbackSwitch;
+
 	const handleClick_explore = (text) => {
 		console.log(`You clicked on: ${text}`);
 		callbackSwitchFunc({ epoch: text, flag: "entry" });
 	};
-  
+	
+	const toggleMenu = (id) => {
+		setOpenMenuId(openMenuId === id ? null : id);
+	  };
+	  
 	const [backendData, setBackendData] = useState([]);
 	const [tableHeaders, setTableHeaders] = useState([]);
+
 	useEffect(() => {
 		setTableHeaders(["Date", "Amount"]);
 		fetch("/getrecs?year=2024&month=11").then(
@@ -32,6 +42,34 @@ function MainExplorer(props) {
 			}
 		)
 	}, [])
+
+	  // Close menu on Escape key press
+	  useEffect(() => {
+		const handleKeyDown = (event) => {
+		  if (event.key === "Escape") {
+			setOpenMenuId(null);
+		  }
+		};
+		document.addEventListener("keydown", handleKeyDown);
+		// Cleanup event listener on component unmount
+		return () => {
+		  document.removeEventListener("keydown", handleKeyDown);
+		};
+	  }, []);
+	
+	  // Close menu on outside click
+	  useEffect(() => {
+		const handleClickOutside = (event) => {
+		  if (menuRef.current && !menuRef.current.contains(event.target)) {
+			setOpenMenuId(null);
+		  }
+		};
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+		  document.removeEventListener("mousedown", handleClickOutside);
+		};
+	  }, []);
+
 	return (
 		<div>
 			<div>HELLO WORLD</div>
@@ -55,8 +93,20 @@ function MainExplorer(props) {
 										{row[field]}
 									</td>
 								)})}
-								<td style={{color:clientConfig[row.super].linkTextForeColor, backgroundColor:clientConfig[row.super].linkTextBackColor}}>
-									<span onClick={() => handleClick_explore(row.epoch)}>edit</span>
+								<td>
+									<div className="menu-dot">
+										<SlOptionsVertical onClick={() => toggleMenu(row.epoch)}></SlOptionsVertical>
+									</div>
+									{openMenuId === row.epoch && (
+										<div ref={menuRef}style={{
+																	position: "absolute",
+																	background: "#fff",
+																	border: "1px solid #ccc",
+																	padding: "1px",
+																	borderRadius: "5px",}}>
+											<p className="menu-item" onClick={() => handleClick_explore(row.epoch)}>View</p>
+											<p className="menu-item" onClick={() => alert(`Delete `)}>Delete</p>
+										</div>)}
 								</td>
 							</tr>
 						)) : <></>}
