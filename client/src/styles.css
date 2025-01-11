@@ -1,0 +1,29 @@
+.App {
+	font-family: sans-serif;
+	text-align: center;
+  }
+  
+  .menu-item {
+	margin: 0;
+	padding: 5px;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+  }
+  
+  .menu-item:hover {
+	background-color: #e8ebff;
+  }
+  
+  .menu-dot {
+	background: #ffffff;
+	padding-left: 10px;
+	padding-top: 4px;
+	border-radius: 8px;
+	color: rgb(0, 27, 148);
+  }
+  
+  .menu-dot:hover {
+	background-color: #c1c9ff;
+	cursor: pointer;
+  }
+  
