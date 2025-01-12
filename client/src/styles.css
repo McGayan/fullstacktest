@@ -27,3 +27,11 @@
 	cursor: pointer;
   }
   
+  .timeFilterPanal_active {
+	margin-top: 20px;
+	margin-bottom: 20px;
+  }
+
+  .timeFilterPanal_inactive {
+	display: none;
+  }

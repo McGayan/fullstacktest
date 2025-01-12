@@ -2,6 +2,7 @@ import "./styles.css";
 import React, {useEffect, useState, useRef} from 'react'
 import utils from "./utils.js";
 import { SlOptionsVertical } from "react-icons/sl";
+import YearMonthPicker from "./YearMonthPicker.js";
 const clientConfig = require('./clientConfig.js');
 
 function MainExplorer(props) {
@@ -20,6 +21,7 @@ function MainExplorer(props) {
 	  
 	const [backendData, setBackendData] = useState([]);
 	const [tableHeaders, setTableHeaders] = useState([]);
+	const [timeFilterEnabled, setTimeFilterEnabled] = useState(false);
 
 	useEffect(() => {
 		setTableHeaders(["Date", "Amount"]);
@@ -72,7 +74,14 @@ function MainExplorer(props) {
 
 	return (
 		<div>
-			<div>HELLO WORLD</div>
+			<div style={{margin: "10px"}}>
+				<input type="checkbox" id="vehicle1" name="chkEnableTimeFilter" value={timeFilterEnabled} onChange={event => {setTimeFilterEnabled(event.target.checked)}}></input>
+				<label for="chkEnableTimeFilter"> Enable TTime Filter:</label><br></br>
+				<div className={timeFilterEnabled ? "timeFilterPanal_active" : "timeFilterPanal_inactive"}>
+					<YearMonthPicker />
+					<YearMonthPicker />
+				</div>
+			</div>
 			<table  style={{ borderCollapse: "collapse", width: "80%" }} border="1">
 				<thead>
 					<tr>
