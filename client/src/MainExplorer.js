@@ -3,9 +3,11 @@ import React, {useEffect, useState, useRef} from 'react'
 import utils from "./utils.js";
 import { SlOptionsVertical } from "react-icons/sl";
 import YearMonthPicker from "./YearMonthPicker.js";
+//import DataProvider from "./DataProvider.js";
 const clientConfig = require('./clientConfig.js');
 
 function MainExplorer(props) {
+	const setSize = 15;
 	const [openMenuId, setOpenMenuId] = useState(null);
 	const menuRef = useRef(null);
 	const callbackSwitchFunc = props.callbackSwitch;
@@ -22,28 +24,36 @@ function MainExplorer(props) {
 	const [backendData, setBackendData] = useState([]);
 	const [tableHeaders, setTableHeaders] = useState([]);
 	const [timeFilterEnabled, setTimeFilterEnabled] = useState(false);
+	
+	const processBackEndData = (data) => {
+		if(data != null) {
+			const indexMap = utils.getIndexMap(data.records);
+			let displayRows = [];
+			data.records.forEach(record => {
+				let displayRec = {}
+				let date = new Date(record.epoch * 1000);
+				displayRec.Date = date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate()
+				displayRec.Amount = indexMap.amount != null ? utils.calculateTotal(record, indexMap.amount).toFixed(2) : 0;
+				displayRec.super = record.super;
+				displayRec.epoch = record.epoch;
+				displayRows.push(displayRec);
+			})
+			setBackendData(displayRows);
+		}
+	}
 
 	useEffect(() => {
 		setTableHeaders(["Date", "Amount"]);
-		fetch("/getrecs?year=2024&month=11").then(
-			response => response.json()
-		).then(
-			data => {
-				const indexMap = utils.getIndexMap(data.records);
-				let displayRows = [];
-				data.records.forEach(record => {
-					let displayRec = {}
-					let date = new Date(record.epoch * 1000);
-					displayRec.Date = date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate()
-					displayRec.Amount = indexMap.amount != null ? utils.calculateTotal(record, indexMap.amount).toFixed(2) : 0;
-					displayRec.super = record.super;
-					displayRec.epoch = record.epoch;
-					displayRows.push(displayRec);
-				})
-				setBackendData(displayRows);
+		const fetchData = async () => {
+			try {
+				const data = await props.dataProvider.getStartingSet(setSize);//GetRecords(2024, 11)
+				processBackEndData(data);
+			}catch (err) {
+
 			}
-		)
-	}, [])
+		}
+		fetchData();
+	}, []);
 
 	  // Close menu on Escape key press
 	  useEffect(() => {
@@ -71,6 +81,61 @@ function MainExplorer(props) {
 		  document.removeEventListener("mousedown", handleClickOutside);
 		};
 	  }, []);
+
+	const fetchPreviousSet = async () => {
+		try {
+			const data = await props.dataProvider.getSetBackward(setSize);//GetRecords(2024, 11)
+			processBackEndData(data);
+		}catch (err) {
+
+		}
+	}
+
+	const fetchNextSet = async () => {
+		try {
+			const data = await props.dataProvider.getSetForward(setSize);//GetRecords(2024, 11)
+			processBackEndData(data);
+		}catch (err) {
+
+		}
+	}
+
+	const updateBackFrame = () => {
+		let frame = [];
+		for(let i=0; i<backendData.length; i++) {
+			const record = backendData[i];
+			const dateString = record.Date;
+			const [year_, month_, day_] = dateString.split("/").map(part => Number(part.trim()));
+			const frameRec = {year: year_, month: month_, epoch: record.epoch};
+			frame.push(frameRec);
+		}
+		props.dataProvider.backFrameStack.push(frame);
+	}
+
+	const fetchInitialSet = async () => {
+		try {
+			const data = await props.dataProvider.getStartingSet(setSize);//GetRecords(2024, 11)
+			processBackEndData(data);
+		}catch (err) {
+
+		}
+	}
+
+	const onClickNext = () => {
+		//fetchNextSet();
+		const frame = props.dataProvider.backFrameStack.length != 0 ? props.dataProvider.backFrameStack.pop() : [];
+		const set = props.dataProvider.getFrameSet(frame);
+		processBackEndData(set);
+	}
+
+	const  onClickPrevious = () => {
+		updateBackFrame();
+		fetchPreviousSet();
+	}
+
+	const  onClickFirstSet = () => {
+		fetchInitialSet();
+	}
 
 	return (
 		<div>
@@ -121,6 +186,9 @@ function MainExplorer(props) {
 						)) : <></>}
 				</tbody>
 			</table>
+			<button onClick={onClickFirstSet} className="tableNavControlBtn">{"<<"}</button>
+			<button onClick={onClickPrevious} className="tableNavControlBtn">{"< Back"}</button>
+			<button onClick={onClickNext} className="tableNavControlBtn">{"Next >"}</button>
 		</div>
 	)
 }

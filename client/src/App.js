@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import EntryExplorer from "./EntryExplorer";
 import MainExplorer from "./MainExplorer";
 
-function App() {
-
-	const [displayContent, setDisplayContent] = useState({
-		flag: "main",
-		epoch: -1,
-	  });
+function App(props) {
+	const date = new Date();
+	
+	const [displayContent, setDisplayContent] = useState({flag: "main",	epoch: -1, });
 	
 	  const switchFunction = (props) => {
 		console.log(`HELLO SWITCH: ${props.epoch}`);
@@ -17,7 +15,7 @@ function App() {
 	return(
 		<div>
 			{displayContent.flag === "main" ? (
-				<MainExplorer callbackSwitch={switchFunction} />
+				<MainExplorer callbackSwitch={switchFunction} dataProvider={props.dataProvider}/>
 			) : (
 				<EntryExplorer	callbackSwitch={switchFunction}	epoch={displayContent.epoch}/>
 			)}

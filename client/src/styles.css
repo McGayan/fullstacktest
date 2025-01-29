@@ -35,3 +35,7 @@
   .timeFilterPanal_inactive {
 	display: none;
   }
+
+  .tableNavControlBtn {
+	margin: 5px;
+  }
