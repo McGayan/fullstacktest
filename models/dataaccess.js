@@ -81,7 +81,12 @@ class DataAcecss
 		if((this.metadata.latestepoch != latestEpoch) || (metadata.earliestepoch != earliestEpoch)) {
 			this.metadata.latestepoch = latestEpoch;
 			this.metadata.earliestepoch = earliestEpoch;
-			await container.items.upsert(this.metadata);
+			try {
+				await this.container.items.upsert(this.metadata);
+			}
+			catch(ex) {
+				console.log("Error updating metadata ${ex.message}");
+			}
 		}
 	}
 
@@ -134,7 +139,7 @@ class DataAcecss
 		try
 		{
 			const resp = await this.container.items.create(product);
-			this.updateMetadata(product.epoch);
+			await this.updateMetadata(product.epoch);
 			console.log('In the addProduct ${JSON.stringify(resp.body)}');
 			return resp.resource;
 		}
