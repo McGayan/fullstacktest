@@ -13,6 +13,7 @@ class DataAcecss
 		this.client = new CosmosClient(appConfig.conneectionString);
 		this.databaseId = appConfig.databaseId;
 		this.collectionId = appConfig.containerId;
+		this.metadata = null;
 	}
 	
 	async checkDatabaseExists(databaseId)
@@ -64,11 +65,24 @@ class DataAcecss
 		const itemCount = await this.getContainerItemCount();
 		console.log(`Number of items in container "${this.collectionId}": ${itemCount}`);
 
-		var metadata = await this.getMetadataEntry();
-		if(metadata == null) {
-			metadata = await this.createMetadaataEntry();
+		this.metadata = await this.getMetadataEntry();
+		if(this.metadata == null) {
+			this.metadata = await this.createMetadaataEntry();
 		}
-		console.log(metadata);
+	}
+
+	async updateMetadata(epoch) {
+		var latestEpoch = this.metadata.latestepoch;
+		var earliestEpoch = this.metadata.earliestepoch;
+		if(latestEpoch < epoch)
+			latestEpoch = epoch;
+		if(earliestEpoch > epoch)
+			earliestEpoch = epoch;
+		if((this.metadata.latestepoch != latestEpoch) || (metadata.earliestepoch != earliestEpoch)) {
+			this.metadata.latestepoch = latestEpoch;
+			this.metadata.earliestepoch = earliestEpoch;
+			await container.items.upsert(this.metadata);
+		}
 	}
 
 	async createMetadaataEntry() {
@@ -120,6 +134,7 @@ class DataAcecss
 		try
 		{
 			const resp = await this.container.items.create(product);
+			this.updateMetadata(product.epoch);
 			console.log('In the addProduct ${JSON.stringify(resp.body)}');
 			return resp.resource;
 		}
@@ -197,6 +212,9 @@ class DataAcecss
 	}
 	
 	async getMetadataEntry() {
+		if(this.metadata != null)
+			return this.metadata;
+
 		const query = 'SELECT * FROM c WHERE c.id = "metadata"';
 		try
 		{	
