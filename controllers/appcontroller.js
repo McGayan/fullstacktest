@@ -25,6 +25,12 @@ class ServiceController
 		response.send({ data: product });
 	}
 	
+	async getMetadata()
+	{
+		var metadata = await this.dao.getMetadataEntry();
+		return metadata;
+	}
+
 	async deleteRecord(request, response) 
 	{
 		const responseMessage = await this.dao.deleteItem(request.params.id);

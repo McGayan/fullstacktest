@@ -41,6 +41,11 @@ app.get('/getrecs', async (req, res) => {
 	res.status(201).json({ success: true, message: "Data queried successfully", records: respomse });
 });
 
+app.get('/metadata', async (req, res) => {
+	let respomse = await appController.getMetadata();
+	res.status(201).json({ success: true, message: "Data queried successfully", metadata: respomse });
+});
+
 // The "catchall" handler: For any request that doesn't match "/api", send back React's index.html
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname, '../client/build', 'index.html'));

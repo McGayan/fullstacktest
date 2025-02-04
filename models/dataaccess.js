@@ -63,6 +63,56 @@ class DataAcecss
 		console.log('Container Created ${this.container}');
 		const itemCount = await this.getContainerItemCount();
 		console.log(`Number of items in container "${this.collectionId}": ${itemCount}`);
+
+		var metadata = await this.getMetadataEntry();
+		if(metadata == null) {
+			metadata = await this.createMetadaataEntry();
+		}
+		console.log(metadata);
+	}
+
+	async createMetadaataEntry() {
+		const queryEarliest = 'SELECT c.epoch FROM c WHERE c.epoch>-1 ORDER BY c.epoch ASC OFFSET 0 LIMIT 1';
+		const queryLatest = 'SELECT c.epoch FROM c WHERE c.epoch>-1 ORDER BY c.epoch DESC OFFSET 0 LIMIT 1';
+		try {
+			if(!this.container)
+			{
+				throw new Error('The specified collection is not present');
+			}
+			const result1 = await this.container.items.query(queryEarliest);
+			console.log('Query Result ${(await(result.fetchAll())).resources}');
+			var res =  await result1.fetchAll();
+			var earliestEpoch = 0;
+			if((res.resources != null) && (res.resources.length > 0))
+			{
+				earliestEpoch = res.resources[0].epoch;
+			}
+
+			const result2 = await this.container.items.query(queryLatest);
+			console.log('Query Result ${(await(result.fetchAll())).resources}');
+			res =  await result2.fetchAll();
+			var latestEpoch = 0;
+			if((res.resources != null) && (res.resources.length > 0))
+			{
+				latestEpoch = res.resources[0].epoch;
+			}
+			if ((latestEpoch > 0) && (earliestEpoch > 0)) {
+				const metaEntry = {
+					id:"metadata",
+					year:-1,
+					month:-1,
+					earliestepoch:earliestEpoch,
+					latestepoch:latestEpoch,
+				};
+				const resp = await this.container.items.create(metaEntry);
+				return metaEntry;
+			}
+		}
+		catch(ex)
+		{
+			console.log('The metadata creation failed ${ex.message}');
+			return null;
+		}
 	}
 	
 	async addProduct(product)
@@ -146,6 +196,35 @@ class DataAcecss
 		}
 	}
 	
+	async getMetadataEntry() {
+		const query = 'SELECT * FROM c WHERE c.id = "metadata"';
+		try
+		{	
+			if(!this.container)
+			{
+				throw new Error('The specified collection is not present');
+			}
+			const result = await this.container.items.query(query);
+			console.log('Query Result ${(await(result.fetchAll())).resources}');
+			var res =  await result.fetchAll();
+			if((res.resources != null) && (res.resources.length > 0))
+			{
+				var metadata = res.resources[0];
+				return metadata;
+			}
+			else{
+				return null;
+			}
+		}
+		catch(ex)
+		{
+			return({
+				Message: 'Read oOperation failed',
+				Exception: ex.message
+			});
+		}	
+	}
+
 	async updateProduct(id,product)
 	{
 		try

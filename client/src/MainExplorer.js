@@ -100,17 +100,6 @@ function MainExplorer(props) {
 		}
 	}
 
-	const updateBackFrame = () => {
-		let frame = [];
-		for(let i=0; i<backendData.length; i++) {
-			const record = backendData[i];
-			const dateString = record.Date;
-			const [year_, month_, day_] = dateString.split("/").map(part => Number(part.trim()));
-			const frameRec = {year: year_, month: month_, epoch: record.epoch};
-			frame.push(frameRec);
-		}
-		props.dataProvider.backFrameStack.push(frame);
-	}
 
 	const fetchInitialSet = async () => {
 		try {
@@ -122,19 +111,19 @@ function MainExplorer(props) {
 	}
 
 	const onClickNext = () => {
-		//fetchNextSet();
-		const frame = props.dataProvider.backFrameStack.length != 0 ? props.dataProvider.backFrameStack.pop() : [];
-		const set = props.dataProvider.getFrameSet(frame);
-		processBackEndData(set);
+		fetchNextSet();
 	}
 
 	const  onClickPrevious = () => {
-		updateBackFrame();
 		fetchPreviousSet();
 	}
 
 	const  onClickFirstSet = () => {
 		fetchInitialSet();
+	}
+
+	const onClickDebug = () => {
+		console.log("Debug pressed");
 	}
 
 	return (
@@ -189,6 +178,7 @@ function MainExplorer(props) {
 			<button onClick={onClickFirstSet} className="tableNavControlBtn">{"<<"}</button>
 			<button onClick={onClickPrevious} className="tableNavControlBtn">{"< Back"}</button>
 			<button onClick={onClickNext} className="tableNavControlBtn">{"Next >"}</button>
+			<div><button onClick={onClickDebug} >{"DEBUG"}</button></div>
 		</div>
 	)
 }

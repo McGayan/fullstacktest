@@ -1,18 +1,19 @@
 class DataProvider {
 	
 	constructor() {
-		console.log("Constructor-");
-		this.currentYear = 0;
-		this.currentMonth = 0;
-		this.startMonth = 0;
-		this.startYear = 0;
-		this.endMonth = Number.MAX_VALUE;
-		this.endYear = Number.MAX_VALUE;
+		this.dbSetGetYear = 0;
+		this.dbSetGetMonth = 0;
 		this.cash = {};
 		this.debugEpoch = Date.now();
 		this.lock = false;
-		this.residualSet = [];
-		this.backFrameStack = [];
+
+		this.dataSetStartEpoch = 0;
+		this.dataSetEndEpoch = 0;
+	}
+
+	static async create() {
+		this.metadata = await DataProvider.fetchMetaData();
+		return new DataProvider();
 	}
 
 	updateCash(data) {
@@ -34,36 +35,26 @@ class DataProvider {
 		})
 	}
 
-	SetStartDate(year, month) {
-		this.startMonth = month;
-		this.startYear = year
-	}
-
-	SetEndDate(year, month) {
-		this.endMonth = month;
-		this.endYear = year
-	}
-
 	getValidatedSet(records) {
 		return records;
 	}
 
-	decrementCurrentDate() {
-		this.currentMonth--;
-		if(this.currentMonth == 0) {
-			this.currentMonth = 12;
-			this.currentYear--;
+	decrementDBGetMonth() {
+		this.dbSetGetMonth--;
+		if(this.dbSetGetMonth == 0) {
+			this.dbSetGetMonth = 12;
+			this.dbSetGetYear--;
 		}
-		console.log(this.currentYear + "/" + this.currentMonth);
+		console.log(this.dbSetGetYear + "/" + this.dbSetGetMonth);
 	}
 
-	incrementCurrentDate() {
-		this.currentMonth++;
-		if(this.currentMonth == 13) {
-			this.currentMonth = 1;
-			this.currentYear++;
+	incrementDBGetMonth() {
+		this.dbSetGetMonth++;
+		if(this.dbSetGetMonth == 13) {
+			this.dbSetGetMonth = 1;
+			this.dbSetGetYear++;
 		}
-		console.log(this.currentYear + "/" + this.currentMonth);
+		console.log(this.dbSetGetYear + "/" + this.dbSetGetMonth);
 	}
 
 	sortRecords(records, ascending) {
@@ -72,28 +63,15 @@ class DataProvider {
 		});
 	}
 
-	getFrameSet(frame) {
-		let set = frame.map(entry => {
-			const monthSet = this.cash[entry.year][entry.month];
-			for(let i=0; i<monthSet.length; i++) {
-				if(monthSet[i].epoch === entry.epoch)
-					return monthSet[i];
-			}
-		})
-		let data = {};
-		data.records = set;
-		return data;
-	}
-
 	async getStartingSet(setLength) {
-		this.residualSet = [];
+		this.dataSetStartEpoch = 0;
+		this.dataSetEndEpoch = 0;
+
 		if(this.lock == false) {
 			this.lock = true;
 			let data = null;
-			if((this.startYear > 0) && (this.startMonth > 0)) {
-				this.currentYear = this.startYear;
-				this.currentMonth = this.startMonth;
-				this.incrementCurrentDate();	//compensate the initial decrement at the start of the getSetBackward() call
+			if((this.dbSetGetYear > 0) && (this.dbSetGetMonth > 0)) {
+				this.incrementDBGetMonth();	//compensate the initial decrement at the start of the getSetBackward() call
 				data = await this.getSetBackward(setLength);
 			}
 			return data;
@@ -102,47 +80,87 @@ class DataProvider {
 	}
 
 	async getSetBackward(setLength) {
-		let recordSet = this.residualSet;
-		this.residualSet = [];
+		let recordSet = [];
+
+		if(this.dataSetStartEpoch > 0) {
+			var d = new Date(this.dataSetStartEpoch * 1000);
+			this.dbSetGetMonth = d.getMonth() + 1;	//convert 0 based month
+			this.dbSetGetYear = d.getFullYear();
+			this.incrementDBGetMonth();
+		}
+		var strartEpoch = this.dataSetStartEpoch;
 		while(recordSet.length < setLength) {
-			this.decrementCurrentDate();
-			const data = await this.GetRecords(this.currentYear, this.currentMonth);
+			this.decrementDBGetMonth();
+			const data = await this.GetRecords(this.dbSetGetYear, this.dbSetGetMonth);
 			const tmpRecords = this.getValidatedSet(data.records);
-			this.sortRecords(tmpRecords, false);
-			for (var i = 0; i < tmpRecords.length; i++) {
+			var startI = 0;
+			if(strartEpoch > 0) {
+				for(var i = 0; i < tmpRecords.length; i++)
+					if(tmpRecords[i].epoch == strartEpoch) {
+						startI = i++;
+						strartEpoch = 0;
+						break;
+					}
+			}
+			
+			for (var i = startI; i < tmpRecords.length; i++) {
 				if(recordSet.length < setLength) {
 					recordSet.push(tmpRecords[i]);
 				}
 				else {
-					this.residualSet.push(tmpRecords[i]);
+					break;
 				}
 			}
 		}
 		var data = {};
 		data.records = recordSet;
+		if((recordSet != null) && (recordSet.length > 0)) {
+			this.dataSetEndEpoch = recordSet[0].epoch
+			this.dataSetStartEpoch = recordSet[recordSet.length - 1].epoch
+		}
 		this.lock = false;
 		return data;
 	}
 
 	async getSetForward(setLength) {
-		let recordSet = this.residualSet;
-		this.residualSet = [];
+		let recordSet = [];
+
+		if(this.dataSetEndEpoch > 0) {
+			var d = new Date(this.dataSetEndEpoch * 1000);
+			this.dbSetGetMonth = d.getMonth() + 1;	//convert 0 based month
+			this.dbSetGetYear = d.getFullYear();
+			this.decrementDBGetMonth();
+		}
+		var endEpoch = this.dataSetEndEpoch;
 		while(recordSet.length < setLength) {
-			this.incrementCurrentDate();
-			const data = await this.GetRecords(this.currentYear, this.currentMonth);
+			this.incrementDBGetMonth();
+			const data = await this.GetRecords(this.dbSetGetYear, this.dbSetGetMonth);
 			const tmpRecords = this.getValidatedSet(data.records);
-			this.sortRecords(tmpRecords, true);
-			for (var i = 0; i < tmpRecords.length; i++) {
+			var startI = tmpRecords.length - 1;
+			if(endEpoch > 0) {
+				for(var i = tmpRecords.length - 1; i >= 0; i--)
+					if(tmpRecords[i].epoch == endEpoch) {
+						startI = i--;
+						endEpoch = 0;
+						break;
+					}
+			}
+			
+			for (var i = startI; i >= 0; i--) {
 				if(recordSet.length < setLength) {
 					recordSet.push(tmpRecords[i]);
 				}
 				else {
-					this.residualSet.push(tmpRecords[i]);
+					break;
 				}
 			}
 		}
 		var data = {};
-		data.records = recordSet;
+		data.records = recordSet.reverse();
+		if((recordSet != null) && (recordSet.length > 0)) {
+			this.dataSetEndEpoch = recordSet[0].epoch
+			this.dataSetStartEpoch = recordSet[recordSet.length - 1].epoch
+		}
 		this.lock = false;
 		return data;
 	}
@@ -161,6 +179,7 @@ class DataProvider {
 					throw new Error(`HTTP error! Status: ${response.status}`);
 				}
 				const data = await response.json(); // Convert JSON to an object
+				this.sortRecords(data.records, false);
 				this.updateCash(data);
 				return data; // Return the data object
 			} catch (error) {
@@ -169,10 +188,25 @@ class DataProvider {
 			}
 		}
 	}
-	async GetPreviousMonthRecord() {
-		this.decrementCurrentDate();
-		const data = await this.GetRecords(this.currentYear, this.currentMonth);
-		return data;
+
+	static async fetchMetaData() {
+		const url = "/metadata";
+		try {
+			const response = await fetch(url); // Fetch data from the URL
+			if (!response.ok) {
+				throw new Error(`HTTP error! Status: ${response.status}`);
+			}
+			const data = await response.json(); // Convert JSON to an object
+			return data;
+		} catch (error) {
+			console.error('Error fetching data:', error);
+			throw error; // Re-throw the error to the caller
+		}
+	}
+
+	SetStartMonth(year, month) {
+		this.dbSetGetMonth = month;
+		this.dbSetGetYear = year
 	}
 }
 

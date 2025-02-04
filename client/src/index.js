@@ -5,9 +5,9 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import DataProvider from './DataProvider.js'; 
 
-const _dataProvider = new DataProvider();
+const _dataProvider = await DataProvider.create();
 const date = new Date();
-_dataProvider.SetStartDate(date.getFullYear(), date.getMonth() + 1);
+_dataProvider.SetStartMonth(date.getFullYear(), date.getMonth() + 1);
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
 	<React.StrictMode>
