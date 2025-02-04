@@ -53,7 +53,7 @@ function MainExplorer(props) {
 			}
 		}
 		fetchData();
-	}, []);
+	}, [props.dataProvider]);
 
 	  // Close menu on Escape key press
 	  useEffect(() => {
