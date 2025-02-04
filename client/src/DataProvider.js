@@ -28,7 +28,7 @@ class DataProvider {
 				this.cash[year][month] = [];
 			}
 			const existingEntries = this.cash[year][month].find(entry => {
-				return entry.epoch == record.epoch;
+				return entry.epoch === record.epoch;
 			})
 			if(existingEntries == null)
 				this.cash[year][month].push(record);
@@ -41,7 +41,7 @@ class DataProvider {
 
 	decrementDBGetMonth() {
 		this.dbSetGetMonth--;
-		if(this.dbSetGetMonth == 0) {
+		if(this.dbSetGetMonth === 0) {
 			this.dbSetGetMonth = 12;
 			this.dbSetGetYear--;
 		}
@@ -50,7 +50,7 @@ class DataProvider {
 
 	incrementDBGetMonth() {
 		this.dbSetGetMonth++;
-		if(this.dbSetGetMonth == 13) {
+		if(this.dbSetGetMonth === 13) {
 			this.dbSetGetMonth = 1;
 			this.dbSetGetYear++;
 		}
@@ -67,7 +67,7 @@ class DataProvider {
 		this.dataSetStartEpoch = 0;
 		this.dataSetEndEpoch = 0;
 
-		if(this.lock == false) {
+		if(this.lock === false) {
 			this.lock = true;
 			let data = null;
 			if((this.dbSetGetYear > 0) && (this.dbSetGetMonth > 0)) {
@@ -95,15 +95,15 @@ class DataProvider {
 			const tmpRecords = this.getValidatedSet(data.records);
 			var startI = 0;
 			if(strartEpoch > 0) {
-				for(var i = 0; i < tmpRecords.length; i++)
-					if(tmpRecords[i].epoch == strartEpoch) {
+				for(let i = 0; i < tmpRecords.length; i++)
+					if(tmpRecords[i].epoch === strartEpoch) {
 						startI = i++;
 						strartEpoch = 0;
 						break;
 					}
 			}
 			
-			for (var i = startI; i < tmpRecords.length; i++) {
+			for (let i = startI; i < tmpRecords.length; i++) {
 				if(recordSet.length < setLength) {
 					recordSet.push(tmpRecords[i]);
 				}
@@ -138,15 +138,15 @@ class DataProvider {
 			const tmpRecords = this.getValidatedSet(data.records);
 			var startI = tmpRecords.length - 1;
 			if(endEpoch > 0) {
-				for(var i = tmpRecords.length - 1; i >= 0; i--)
-					if(tmpRecords[i].epoch == endEpoch) {
+				for(let i = tmpRecords.length - 1; i >= 0; i--)
+					if(tmpRecords[i].epoch === endEpoch) {
 						startI = i--;
 						endEpoch = 0;
 						break;
 					}
 			}
 			
-			for (var i = startI; i >= 0; i--) {
+			for (let i = startI; i >= 0; i--) {
 				if(recordSet.length < setLength) {
 					recordSet.push(tmpRecords[i]);
 				}

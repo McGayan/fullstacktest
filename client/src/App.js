@@ -3,8 +3,6 @@ import EntryExplorer from "./EntryExplorer";
 import MainExplorer from "./MainExplorer";
 
 function App(props) {
-	const date = new Date();
-	
 	const [displayContent, setDisplayContent] = useState({flag: "main",	epoch: -1, });
 	
 	  const switchFunction = (props) => {
