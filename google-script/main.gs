@@ -1,4 +1,12 @@
 var billData = {}
+var errorOccured = false;
+
+function parseMails() {
+  errorOccured = false;
+  addLable();
+  processKeelsMails();
+  processArpicoMails();
+}
 
 function addLable() {
    const keellsLableName = "Keells"
@@ -193,8 +201,7 @@ function logInDrive(msgBody, fileName)
   var file = DriveApp.createFile(fileName, msgBody, MimeType.PLAIN_TEXT);
 }
 
-function getKeelsMails() {
-  addLable();
+function processKeelsMails() {
   const keellsLableName = "Keells"
   let keellsLable = GmailApp.getUserLabelByName(keellsLableName)
   const threads = keellsLable.getThreads()
@@ -220,7 +227,8 @@ function getKeelsMails() {
           billData.metadata.super = "k"
           Logger.log(JSON.stringify(billData))
           postBillDataToAzure();
-          message.markRead();
+          if(!errorOccured)
+            message.markRead();
           break;  //skip the rest of the messages in this thread
         }
         else
@@ -250,11 +258,12 @@ function postBillDataToAzure()
   catch (error)
   {
     // Handle any errors
+    errorOccured = true;
     Logger.log("Error: " + error.message);
   }
 }
 
-function parseArpicoMails()
+function processArpicoMails()
 {
   const lableName = "arpico"
   let lable = GmailApp.getUserLabelByName(lableName)
@@ -287,8 +296,9 @@ function parseArpicoMails()
                   billData.metadata = {};
                   billData.metadata.super = "a";
                   billData.billUrl = urlMatches[0].replace(/^\s*\"|\"\s*$/g, ''); //replace leading and trailing spaces and the double quots
-                  //postBillDataToAzure();
-
+                  postBillDataToAzure();
+                  if(!errorOccured)
+                    message.markRead();
                   Logger.log(JSON.stringify(billData));
                   break;
               }
