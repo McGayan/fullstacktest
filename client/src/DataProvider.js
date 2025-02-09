@@ -1,6 +1,8 @@
+import utils from "./utils.js";
+
 class DataProvider {
 	
-	constructor() {
+	constructor(_metadata) {
 		this.dbSetGetYear = 0;
 		this.dbSetGetMonth = 0;
 		this.cash = {};
@@ -9,11 +11,12 @@ class DataProvider {
 
 		this.dataSetStartEpoch = 0;
 		this.dataSetEndEpoch = 0;
+		this.metadata = _metadata;
 	}
 
 	static async create() {
-		this.metadata = await DataProvider.fetchMetaData();
-		return new DataProvider();
+		let _metadata = await DataProvider.fetchMetaData();
+		return new DataProvider(_metadata);
 	}
 
 	updateCash(data) {
@@ -45,7 +48,6 @@ class DataProvider {
 			this.dbSetGetMonth = 12;
 			this.dbSetGetYear--;
 		}
-		console.log(this.dbSetGetYear + "/" + this.dbSetGetMonth);
 	}
 
 	incrementDBGetMonth() {
@@ -54,7 +56,6 @@ class DataProvider {
 			this.dbSetGetMonth = 1;
 			this.dbSetGetYear++;
 		}
-		console.log(this.dbSetGetYear + "/" + this.dbSetGetMonth);
 	}
 
 	sortRecords(records, ascending) {
@@ -91,6 +92,8 @@ class DataProvider {
 		var strartEpoch = this.dataSetStartEpoch;
 		while(recordSet.length < setLength) {
 			this.decrementDBGetMonth();
+			if(utils.ToEpoch(this.dbSetGetYear, this.dbSetGetMonth) < this.metadata.metadata.earliestepoch) 
+				break;
 			const data = await this.GetRecords(this.dbSetGetYear, this.dbSetGetMonth);
 			const tmpRecords = this.getValidatedSet(data.records);
 			var startI = 0;
@@ -134,6 +137,8 @@ class DataProvider {
 		var endEpoch = this.dataSetEndEpoch;
 		while(recordSet.length < setLength) {
 			this.incrementDBGetMonth();
+			if(utils.ToEpoch(this.dbSetGetYear, this.dbSetGetMonth) > this.metadata.metadata.latestepoch)
+				break;
 			const data = await this.GetRecords(this.dbSetGetYear, this.dbSetGetMonth);
 			const tmpRecords = this.getValidatedSet(data.records);
 			var startI = tmpRecords.length - 1;
@@ -166,12 +171,20 @@ class DataProvider {
 	}
 
 	async GetRecords(year, month) {
+		let epoch = utils.ToEpoch(year, month);
+		if((this.metadata.metadata.earliestepoch > epoch) || (this.metadata.metadata.latestepoch < epoch)) {
+			let data = {};
+			data.records = [];
+			return data;
+		}
 		if((this.cash[year] != null ) && (this.cash[year][month] != null)) {
+			console.log(year + "/" + month + " [H]");
 			var data = {};
 			data.records = this.cash[year][month];
 			return data;
 		}
 		else {
+			console.log(year + "/" + month + " [M]");
 			const url = "/getrecs?year=" + year + "&month=" + month;
 			try {
 				const response = await fetch(url); // Fetch data from the URL

@@ -3,7 +3,6 @@ import React, {useEffect, useState, useRef} from 'react'
 import utils from "./utils.js";
 import { SlOptionsVertical } from "react-icons/sl";
 import YearMonthPicker from "./YearMonthPicker.js";
-//import DataProvider from "./DataProvider.js";
 const clientConfig = require('./clientConfig.js');
 
 function MainExplorer(props) {
@@ -24,9 +23,13 @@ function MainExplorer(props) {
 	const [backendData, setBackendData] = useState([]);
 	const [tableHeaders, setTableHeaders] = useState([]);
 	const [timeFilterEnabled, setTimeFilterEnabled] = useState(false);
-	
+	const [nextButtonDisabled, setNextButtonDisabled] = useState(false);
+	const [prevButtonDisabled, setPrevButtonDisabled] = useState(false);
+
 	const processBackEndData = (data) => {
 		if(data != null) {
+			setNextButtonDisabled(false);
+			setNextButtonDisabled(false);
 			const indexMap = utils.getIndexMap(data.records);
 			let displayRows = [];
 			data.records.forEach(record => {
@@ -37,6 +40,12 @@ function MainExplorer(props) {
 				displayRec.super = record.super;
 				displayRec.epoch = record.epoch;
 				displayRows.push(displayRec);
+				if(record.epoch == props.dataProvider.metadata.metadata.latestepoch) {
+					setNextButtonDisabled(true);
+				}
+				if(record.epoch == props.dataProvider.metadata.metadata.earliestepoch) {
+					setPrevButtonDisabled(true);
+				}
 			})
 			setBackendData(displayRows);
 		}
@@ -176,8 +185,8 @@ function MainExplorer(props) {
 				</tbody>
 			</table>
 			<button onClick={onClickFirstSet} className="tableNavControlBtn">{"<<"}</button>
-			<button onClick={onClickPrevious} className="tableNavControlBtn">{"< Back"}</button>
-			<button onClick={onClickNext} className="tableNavControlBtn">{"Next >"}</button>
+			<button onClick={onClickPrevious} className="tableNavControlBtn" disabled={prevButtonDisabled}>{"< Back"}</button>
+			<button onClick={onClickNext} className="tableNavControlBtn" disabled={nextButtonDisabled}>{"Next >"}</button>
 			<div><button onClick={onClickDebug} >{"DEBUG"}</button></div>
 		</div>
 	)
