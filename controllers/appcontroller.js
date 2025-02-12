@@ -38,7 +38,7 @@ class ServiceController
 	}
 	
 	async #CheckforDuplicate(month, year, epoch) {
-		let data = this.getRecordsByMonthAndYear(year, month);
+		let data = await this.getRecordsByMonthAndYear(year, month);
 		let duplicate = false;
 		data.forEach(element => {
 			if(element.epoch == epoch) {

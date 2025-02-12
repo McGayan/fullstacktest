@@ -39,6 +39,7 @@ class DataProvider {
 	}
 
 	getValidatedSet(records) {
+
 		return records;
 	}
 
@@ -108,7 +109,13 @@ class DataProvider {
 			
 			for (let i = startI; i < tmpRecords.length; i++) {
 				if(recordSet.length < setLength) {
-					recordSet.push(tmpRecords[i]);
+					let record = tmpRecords[i];
+					//Check for duplicate
+					const existingEntries = recordSet.find(entry => {
+						return entry.epoch === record.epoch;
+					});
+					if(existingEntries == null)
+						recordSet.push(record);
 				}
 				else {
 					break;
@@ -153,7 +160,13 @@ class DataProvider {
 			
 			for (let i = startI; i >= 0; i--) {
 				if(recordSet.length < setLength) {
-					recordSet.push(tmpRecords[i]);
+					let record = tmpRecords[i];
+					//Check for duplicate
+					const existingEntries = recordSet.find(entry => {
+						return entry.epoch === record.epoch;
+					});
+					if(existingEntries == null)
+						recordSet.push(record);
 				}
 				else {
 					break;
