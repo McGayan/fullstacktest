@@ -7,12 +7,13 @@ function App(props) {
 	const [navIndex, setNavIndex] = useState(0);
 
 	const toggleNavIndex = (index) => {
-		console.log(`HELLO TOGGLE: ${index}`);
 		setNavIndex(index);
 	};	
-	const switchFunction = (props) => {
-	console.log(`HELLO SWITCH: ${props.epoch}`);
-	setDisplayContent(props);
+	const switchFunction = (params) => {
+		if(params.flag === "main") {
+			props.dataProvider.lockCurrentDataSet();
+		}
+		setDisplayContent(params);
 	};
 
 	return(

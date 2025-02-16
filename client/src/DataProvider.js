@@ -10,6 +10,7 @@ class DataProvider {
 		this.lock = false;
 
 		this.dataSetStartEpoch = 0;
+		this.IncludeDataSetStartEpoch = false;
 		this.dataSetEndEpoch = 0;
 		this.metadata = _metadata;
 	}
@@ -17,6 +18,11 @@ class DataProvider {
 	static async create() {
 		let _metadata = await DataProvider.fetchMetaData();
 		return new DataProvider(_metadata);
+	}
+
+	lockCurrentDataSet() {
+		this.dataSetStartEpoch = this.dataSetEndEpoch;
+		this.IncludeDataSetStartEpoch = true;
 	}
 
 	updateCash(data) {
@@ -66,8 +72,6 @@ class DataProvider {
 	}
 
 	async getStartingSet(setLength) {
-		this.dataSetStartEpoch = 0;
-		this.dataSetEndEpoch = 0;
 
 		if(this.lock === false) {
 			this.lock = true;
@@ -101,7 +105,11 @@ class DataProvider {
 			if(strartEpoch > 0) {
 				for(let i = 0; i < tmpRecords.length; i++)
 					if(tmpRecords[i].epoch === strartEpoch) {
-						startI = i++;
+						startI = i + 1;
+						if(this.IncludeDataSetStartEpoch) {
+							startI--;
+							this.IncludeDataSetStartEpoch = false;
+						}
 						strartEpoch = 0;
 						break;
 					}
@@ -152,7 +160,7 @@ class DataProvider {
 			if(endEpoch > 0) {
 				for(let i = tmpRecords.length - 1; i >= 0; i--)
 					if(tmpRecords[i].epoch === endEpoch) {
-						startI = i--;
+						startI = i - 1;
 						endEpoch = 0;
 						break;
 					}
