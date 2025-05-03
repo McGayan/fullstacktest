@@ -7,6 +7,9 @@ function App(props) {
 	const [navIndex, setNavIndex] = useState(0);
 
 	const toggleNavIndex = (index) => {
+		if(navIndex == 0) {
+			props.dataProvider.lockCurrentDataSet();
+		}
 		setNavIndex(index);
 	};	
 	const switchFunction = (params) => {

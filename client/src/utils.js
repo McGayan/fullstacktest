@@ -52,6 +52,13 @@ const ToEpoch = (year, month) => {
 	return new Date(year, month - 1, 1).getTime() / 1000;
 }
 
-const utils = {getIndexMap, calculateTotal, getYearAndMonthFromEpoch, getFormatedDateAndTimeFromEposh, ToEpoch};
+const FilterProperties = () => {
+	return {
+		"startDate": {"year": 0, "month": 1},
+		"endDate": {"year": 0, "month": 12},
+	}
+}
+
+const utils = {getIndexMap, calculateTotal, getYearAndMonthFromEpoch, getFormatedDateAndTimeFromEposh, ToEpoch, FilterProperties};
 
 module.exports = utils;

@@ -25,6 +25,7 @@ function MainExplorer(props) {
 	const [timeFilterEnabled, setTimeFilterEnabled] = useState(false);
 	const [nextButtonDisabled, setNextButtonDisabled] = useState(false);
 	const [prevButtonDisabled, setPrevButtonDisabled] = useState(false);
+	const [filterProperties, setFilterProperties] = useState(utils.FilterProperties());
 
 	const processBackEndData = (data) => {
 		if(data != null) {
@@ -134,6 +135,10 @@ function MainExplorer(props) {
 	const onClickDebug = () => {
 		console.log("Debug pressed");
 	}
+	
+	const onStartDateChanged = (newDate) => {
+		setFilterProperties({ ...filterProperties, startYear: newDate.year, startMonth: newDate.month });
+	}
 
 	return (
 		<div>
@@ -141,7 +146,7 @@ function MainExplorer(props) {
 				<input type="checkbox" id="vehicle1" name="chkEnableTimeFilter" value={timeFilterEnabled} onChange={event => {setTimeFilterEnabled(event.target.checked)}}></input>
 				<label for="chkEnableTimeFilter"> Enable TTime Filter:</label><br></br>
 				<div className={timeFilterEnabled ? "timeFilterPanal_active" : "timeFilterPanal_inactive"}>
-					<YearMonthPicker />
+					<YearMonthPicker onChange={onStartDateChanged} initDate={{"year": (new Date()).getFullYear(), "month": (new Date()).getMonth()}}/>
 					<YearMonthPicker />
 				</div>
 			</div>
