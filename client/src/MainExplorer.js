@@ -27,7 +27,7 @@ function MainExplorer(props) {
 	const [prevButtonDisabled, setPrevButtonDisabled] = useState(false);
 	const [filterProperties, setFilterProperties] = useState(utils.FilterProperties());
 
-	const processBackEndData = (data) => {
+	const processBackEndData = React.useCallback((data) => {
 		if(data != null) {
 			setNextButtonDisabled(false);
 			setNextButtonDisabled(false);
@@ -41,16 +41,16 @@ function MainExplorer(props) {
 				displayRec.super = record.super;
 				displayRec.epoch = record.epoch;
 				displayRows.push(displayRec);
-				if(record.epoch == props.dataProvider.metadata.metadata.latestepoch) {
+				if(record.epoch === props.dataProvider.metadata.metadata.latestepoch) {
 					setNextButtonDisabled(true);
 				}
-				if(record.epoch == props.dataProvider.metadata.metadata.earliestepoch) {
+				if(record.epoch === props.dataProvider.metadata.metadata.earliestepoch) {
 					setPrevButtonDisabled(true);
 				}
 			})
 			setBackendData(displayRows);
 		}
-	}
+	}, [props.dataProvider.metadata.metadata.latestepoch, props.dataProvider.metadata.metadata.earliestepoch]);
 
 	useEffect(() => {
 		setTableHeaders(["Date", "Amount"]);
@@ -63,7 +63,7 @@ function MainExplorer(props) {
 			}
 		}
 		fetchData();
-	}, [props.dataProvider]);
+	}, [props.dataProvider, processBackEndData]);
 
 	  // Close menu on Escape key press
 	  useEffect(() => {
