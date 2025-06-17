@@ -51,7 +51,7 @@ class ServiceController
 	{
 		const epoch = body.metadata.epoch;
 		const dateKey = this.#getYearAndMonthFromEpoch(epoch);
-		let isDuplicate = this.#CheckforDuplicate(dateKey.month, dateKey.year, epoch);
+		let isDuplicate = await this.#CheckforDuplicate(dateKey.month, dateKey.year, epoch);
 		if(isDuplicate) {
 			return { message: 'Duplicate Entry' };
 		}
