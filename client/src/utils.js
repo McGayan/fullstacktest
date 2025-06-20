@@ -15,7 +15,7 @@ const calculateTotal = (record, amountIndex) => {
 	let total = 0;
 	const expenses = record.expenses;
 	expenses.forEach(expenseRow => {
-		total += parseFloat(expenseRow[amountIndex]);
+		total += parseFloat(expenseRow[amountIndex].replace(/,/g, ""));
 	});
 	//console.log(total);
 	return total;
