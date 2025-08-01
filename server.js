@@ -1,5 +1,6 @@
 const express = require('express');
 const arpicoParser = require('./arpicoParser.js')
+const srinParser = require('./srinParser.js');
 const path = require('path');
 const cors = require('cors');
 const app = express();
@@ -62,6 +63,14 @@ app.post("/exprec", async(req, res) => {
 		else if(data.metadata.super == "a"){
 			const arpicoBill = await arpicoParser.parseArpicoFromUrl(data);
 			addResponce = await appController.addProduct(arpicoBill);
+		}
+		else if(data.metadata.super == "s") {
+			const srinBill = await srinParser.parseSrinPromUrl(data);
+			addResponce = await appController.addProduct(srinBill);
+		}
+		else {
+			res.status(400).json({ success: false, message: "Invalid metadata super type" });
+			return;
 		}
 	}
 	//res.json({ message: 'Data received successfully', receivedData: addResponce });

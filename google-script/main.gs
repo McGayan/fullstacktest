@@ -6,10 +6,11 @@ function parseMails() {
   addLable();
   processKeelsMails();
   processArpicoMails();
+  processSriyaniMails();
 }
 
 function addLable() {
-   const keellsLableName = "Keells"
+  const keellsLableName = "Keells"
   let keellsLable = GmailApp.getUserLabelByName(keellsLableName)
   if(keellsLable == null)
   {
@@ -20,6 +21,12 @@ function addLable() {
   if(arpicoLable == null)
   {
     arpicoLable = GmailApp.createLabel(arpicoLableName)
+  }
+  const sriyaniLableName = "Sriyani"
+  let sriyaniLable = GmailApp.getUserLabelByName(sriyaniLableName)
+  if(sriyaniLable == null)
+  {
+    sriyaniLable = GmailApp.createLabel(sriyaniLableName)
   }
   const threads = GmailApp.getInboxThreads();
   threads.forEach((thread) => {
@@ -32,6 +39,11 @@ function addLable() {
     else if(name.toLowerCase().includes("arpico"))
     {
       thread.addLabel(arpicoLable)
+      thread.moveToArchive()
+    }
+	else if(name.toLowerCase().includes("sriyani"))
+    {
+      thread.addLabel(sriyaniLable)
       thread.moveToArchive()
     }
   })
@@ -295,6 +307,53 @@ function processArpicoMails()
               {
                   billData.metadata = {};
                   billData.metadata.super = "a";
+                  billData.billUrl = urlMatches[0].replace(/^\s*\"|\"\s*$/g, ''); //replace leading and trailing spaces and the double quots
+                  postBillDataToAzure();
+                  if(!errorOccured)
+                    message.markRead();
+                  Logger.log(JSON.stringify(billData));
+                  break;
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+function processSriyaniMails()
+{
+  const lableName = "sriyani"
+  let lable = GmailApp.getUserLabelByName(lableName)
+  const threads = lable.getThreads()
+  threads.forEach((thread) => {
+    const messages = thread.getMessages()
+    for(msgIndex=0; msgIndex<messages.length; msgIndex++)
+    {
+      let message = messages[msgIndex];
+      if(message.isUnread())
+      {
+        let msgBody = message.getBody()
+        //Log message body in Drive
+        //logInDrive(msgBody, "keells.txt");
+        var hrefPattern = /<a\s+href([^>]*)>/gi;
+        // Find all matches
+        var matches = msgBody.match(hrefPattern);
+        if (matches)
+        {
+          for (var i = 0; i < matches.length; i++)
+          {
+            Logger.log(matches[i]);
+            if(matches[i].includes("ebill"))
+            {
+              billData = {};
+              var urlPattern = /"([^"]*)"/gi;
+              var urlMatches = matches[i].match(urlPattern);
+              if (urlMatches.length > 0)
+              {
+                  billData.metadata = {};
+                  billData.metadata.super = "s";
                   billData.billUrl = urlMatches[0].replace(/^\s*\"|\"\s*$/g, ''); //replace leading and trailing spaces and the double quots
                   postBillDataToAzure();
                   if(!errorOccured)

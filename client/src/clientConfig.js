@@ -15,7 +15,14 @@ const clientConfig = {
 		linkTextForeColor:  "rgb(0, 0, 255)",
 		linkTextBackColor:  "rgb(255, 255, 255)",
 		type: "Arpico"
-	}
+	},
+	s: {
+		rowForeColor:  "rgb(255, 0, 0)",
+		rowBackColor:  "rgb(255, 240, 240)",
+		linkTextForeColor:  "rgb(0, 0, 255)",
+		linkTextBackColor:  "rgb(255, 255, 255)",
+		type: "Sriyani"
+	},
 };
 
 module.exports = clientConfig;
